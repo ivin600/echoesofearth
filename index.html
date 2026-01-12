@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Echoes of Earth: The Voice of Water</title>
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+<script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<style>
+:root {
+    --bg: #020610;
+    --accent: #7de3ff;
+    --glass: rgba(5, 16, 32, 0.75);
+    --border: rgba(125, 227, 255, 0.3);
+}
+body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: #eaf6ff;
+    font-family: 'Segoe UI', sans-serif;
+    overflow-x: hidden; width: 100vw;
+}
+header {
+    position: fixed; top: 0; left: 0; width: 100%; height: 80px;
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    z-index: 100; background: linear-gradient(to bottom, rgba(5,16,32,0.95), transparent);
+    box-sizing: border-box;
+}
+.brand { font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; display: flex; align-items: center; gap: 10px; }
+.brand span { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+#audioBtn {
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--accent);
+    padding: 10px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease;
+    min-width: 140px; text-align: center;
+}
+#audioBtn:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent); }
+nav.progress {
+    position: fixed; right: 30px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 20px; z-index: 90;
+}
+nav.progress a {
+    width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4);
+    transition: 0.3s; cursor: pointer;
+}
+nav.progress a.active { background: var(--accent); border-color: var(--accent); transform: scale(1.5); }
+#webgl-container { position: fixed; inset: 0; z-index: 0; }
+section {
+    min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center;
+    position: relative; pointer-events: none; padding: 80px 20px; box-sizing: border-box;
+}
+.content-wrapper {
+    pointer-events: auto; max-width: 650px; background: var(--glass);
+    padding: 50px; border-radius: 8px; border-left: 4px solid var(--accent);
+    backdrop-filter: blur(12px); opacity: 0; transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+section.active .content-wrapper { opacity: 1; transform: translateY(0); }
+h1 {
+    font-size: clamp(3rem, 6vw, 5rem); margin: 0 0 10px; line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+h2 { font-size: 2rem; color: var(--accent); margin: 0 0 20px 0; font-weight: 300; letter-spacing: 1px; }
+p { font-size: 1.2rem; line-height: 1.7; color: #dcebf7; margin-bottom: 20px; }
+.meta {
+    font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.7); margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1); font-weight: bold;
+}
+.hint { color: var(--accent); margin-right: 10px; }
+footer {
+    position: relative; z-index: 10; padding: 50px; text-align: center;
+    background: var(--bg); border-top: 1px solid var(--border);
+    color: rgba(255,255,255,0.4); font-size: 0.9rem;
+}
+#loader { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; align-items: center; justify-content: center; transition: opacity 0.5s; }
+.spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spinner"></div></div>
+<div id="webgl-container"></div>
+
+<header>
+  <div class="brand"><span></span>Echoes of Earth</div>
+  <button id="audioBtn">🔇 Activar Sonido</button>
+</header>
+
+<nav class="progress">
+  <a onclick="window.scrollTo(0,0)" class="active"></a>
+  <a onclick="document.getElementById('s1').scrollIntoView()"></a>
+  <a onclick="document.getElementById('s2').scrollIntoView()"></a>
+  <a onclick="document.getElementById('s3').scrollIntoView()"></a>
+  <a onclick="document.getElementById('s4').scrollIntoView()"></a>
+</nav>
+
+<main>
+  <section id="hero" class="active" data-state="0">
+    <div class="content-wrapper" style="background:none; border:none; text-align:center; box-shadow:none;">
+      <h1>THE VOICE OF WATER</h1>
+      <p>Una experiencia sensorial sobre la memoria del planeta.</p>
+      <p style="font-size:1rem; opacity:0.8; margin-top:30px; letter-spacing:2px;">SCROLL PARA COMENZAR ↓</p>
+    </div>
+  </section>
+
+  <section id="s1" data-state="1">
+    <div class="content-wrapper">
+      <h2>01. Fuente (Nacimiento)</h2>
+      <p>El agua nace silenciosa. Es el inicio del ciclo, donde el elemento surge como pureza antes del movimiento.</p>
+      <p>Un espejo perfecto, sensible a la más mínima perturbación.</p>
+      <div class="meta">
+         <span class="hint">INTERACCIÓN:</span> Mueve el cursor para crear ondas sutiles.
+      </div>
+    </div>
+  </section>
+
+  <section id="s2" data-state="2">
+    <div class="content-wrapper">
+      <h2>02. Corriente (Flujo)</h2>
+      <p>El agua toma velocidad. Se convierte en río, en fuerza cinética.</p>
+      <p>La corriente arrastra, conecta y fluye sin pausa hacia su destino.</p>
+      <div class="meta">
+        <span class="hint">VISUAL:</span> El agua se agita y fluye rápido.
+      </div>
+    </div>
+  </section>
+
+  <section id="s3" data-state="3">
+    <div class="content-wrapper">
+      <h2>03. Mareas (Relación)</h2>
+      <p>El encuentro con la humanidad. La marea sube y baja, trayendo consigo la tensión, el conflicto y la memoria.</p>
+      <p>El agua se vuelve turbulenta y grisacea.</p>
+      <div class="meta">
+        <span class="hint">INTERACCIÓN:</span> HAZ CLICK PARA GENERAR IMPACTO.
+      </div>
+    </div>
+  </section>
+
+  <section id="s4" data-state="4">
+    <div class="content-wrapper">
+      <h2>04. Memoria (Archivo)</h2>
+      <p>"El agua lo recuerda todo. En su quietud final, se encuentran todos los comienzos."</p>
+      <p>Después de la tormenta, la calma regresa con una profundidad nueva y densa.</p>
+      <div class="meta">
+        <span class="hint">CIERRE:</span> Calma absoluta y profundidad abisal.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Echoes of Earth: The Voice of Water · PEC3 Desarrollo e implementación · Iván De Haro</p>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+
+function createBg(i) {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    const g = ctx.createLinearGradient(0,0,0,512);
+    
+    if(i===0) { 
+        g.addColorStop(0, '#020610'); g.addColorStop(1, '#103050');
+        ctx.fillStyle = g; ctx.fillRect(0,0,512,512);
+    } else if(i===1) { 
+        g.addColorStop(0, '#001a1a'); g.addColorStop(1, '#004d4d'); 
+        ctx.fillStyle = g; ctx.fillRect(0,0,512,512);
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        for(let k=0;k<150;k++) ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
+    } else if(i===2) { 
+        g.addColorStop(0, '#001040'); g.addColorStop(1, '#003090');
+        ctx.fillStyle = g; ctx.fillRect(0,0,512,512);
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        for(let k=0;k<60;k++) {
+            ctx.beginPath(); ctx.moveTo(0, Math.random()*512); ctx.lineTo(512, Math.random()*512); ctx.stroke();
+        }
+    } else if(i===3) { 
+        g.addColorStop(0, '#101520'); g.addColorStop(1, '#203045'); 
+        ctx.fillStyle = g; ctx.fillRect(0,0,512,512);
+        ctx.fillStyle = 'rgba(200,200,200,0.1)';
+        for(let k=0;k<300;k++) {
+            ctx.beginPath(); ctx.arc(Math.random()*512, Math.random()*512, Math.random()*3, 0, 6.28); ctx.fill();
+        }
+    } else { 
+        g.addColorStop(0, '#00081a'); g.addColorStop(1, '#001a33'); 
+        ctx.fillStyle = g; ctx.fillRect(0,0,512,512);
+        ctx.fillStyle = '#fff';
+        for(let k=0;k<400;k++) {
+            ctx.globalAlpha = Math.random() * 0.8;
+            ctx.fillRect(Math.random()*512, Math.random()*512, 1, 1);
+        }
+    }
+    
+    const t = new THREE.CanvasTexture(c);
+    t.mapping = THREE.EquirectangularReflectionMapping;
+    return t;
+}
+
+const bgs = [createBg(0), createBg(1), createBg(2), createBg(3), createBg(4)];
+
+function createTexture() {
+    const size = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, size, size);
+    for (let i = 0; i < 20000; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const r = Math.random() * 25 + 2;
+        const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+        grd.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+    }
+    const t = new THREE.CanvasTexture(canvas);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
+
+class AudioEng {
+    constructor() { this.ctx=null; this.gain=null; this.filt=null; }
+    init() {
+        if(this.ctx) return;
+        this.ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const bs = 2*this.ctx.sampleRate;
+        const buf = this.ctx.createBuffer(1,bs,this.ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for(let i=0;i<bs;i++) d[i]=(Math.random()*2-1)*0.5;
+        const src = this.ctx.createBufferSource();
+        src.buffer=buf; src.loop=true;
+        this.filt = this.ctx.createBiquadFilter();
+        this.filt.type='lowpass';
+        this.gain = this.ctx.createGain();
+        this.gain.gain.value=0;
+        src.connect(this.filt); this.filt.connect(this.gain);
+        this.gain.connect(this.ctx.destination);
+        src.start();
+    }
+    update(s) {
+        if(!this.ctx || this.ctx.state !== 'running') return;
+        const t = this.ctx.currentTime;
+        let f=200, v=0.1;
+        if(s===1) { f=400; v=0.2; }
+        if(s===2) { f=1200; v=0.6; }
+        if(s===3) { f=300; v=0.8; }
+        if(s===4) { f=100; v=0.4; }
+        this.filt.frequency.exponentialRampToValueAtTime(f, t+1);
+        this.gain.gain.linearRampToValueAtTime(v, t+1);
+    }
+}
+const audio = new AudioEng();
+
+const cont = document.getElementById('webgl-container');
+const scene = new THREE.Scene();
+scene.background = bgs[0];
+scene.environment = bgs[0];
+scene.fog = new THREE.FogExp2(0x051020, 0.001);
+
+const cam = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 1, 5000);
+cam.position.set(0,30,140); cam.lookAt(0,5,0);
+
+const rend = new THREE.WebGLRenderer({antialias:true});
+rend.setSize(window.innerWidth, window.innerHeight);
+rend.toneMapping = THREE.ACESFilmicToneMapping;
+rend.toneMappingExposure = 1.3;
+cont.appendChild(rend.domElement);
+
+const tex = createTexture();
+const geo = new THREE.PlaneGeometry(3000,3000,512,512);
+const mat = new THREE.MeshStandardMaterial({
+    color:0x0055ff, roughness:0.1, metalness:0.95,
+    displacementMap:tex, displacementScale:15,
+    bumpMap:tex, bumpScale:0.8, envMapIntensity:3.0
+});
+const water = new THREE.Mesh(geo, mat);
+water.rotation.x = -Math.PI/2;
+scene.add(water);
+
+const dl = new THREE.DirectionalLight(0xffffff,3.5);
+dl.position.set(-1,5,1); scene.add(dl);
+const al = new THREE.AmbientLight(0x404040,2.5); scene.add(al);
+const pl = new THREE.PointLight(0x7de3ff,2,1200);
+pl.position.set(0,250,0); scene.add(pl);
+
+const st = [
+    {c:0x0066ff, d:10, s:0.02},
+    {c:0x00ffff, d:12, s:0.02},
+    {c:0x0033ff, d:30, s:0.12},
+    {c:0x335577, d:30, s:0.06},
+    {c:0x002255, d:4, s:0.005}
+];
+
+let curS = 0;
+let mx=0, my=0;
+let clk=0;
+
+window.addEventListener('mousemove', e => {
+    mx = (e.clientX/window.innerWidth)*2-1;
+    my = -(e.clientY/window.innerHeight)*2+1;
+});
+window.addEventListener('mousedown', () => {
+    if(curS===3) clk = 300;
+    else clk = 50;
+});
+
+const obs = new IntersectionObserver((es) => {
+    es.forEach(e => {
+        if(e.isIntersecting && e.intersectionRatio > 0.5) {
+            curS = e.target.id === 'hero' ? 0 : parseInt(e.target.id.replace('s',''));
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            e.target.classList.add('active');
+            document.querySelectorAll('nav a').forEach((a,i)=>a.classList.toggle('active',i===curS));
+            scene.background = bgs[curS];
+            scene.environment = bgs[curS];
+            audio.update(curS);
+        }
+    });
+}, {threshold:0.5});
+document.querySelectorAll('section').forEach(s => obs.observe(s));
+
+const ab = document.getElementById('audioBtn');
+ab.onclick = () => {
+    if(!audio.ctx) {
+        audio.init();
+        audio.ctx.resume();
+        ab.textContent = "SONIDO: ON";
+        ab.style.background = "var(--accent)";
+        ab.style.color = "#000";
+        return;
+    }
+    if(audio.ctx.state === 'running') {
+        audio.ctx.suspend();
+        ab.textContent = "SONIDO: OFF";
+        ab.style.background = "rgba(255,255,255,0.05)";
+        ab.style.color = "var(--accent)";
+    } else {
+        audio.ctx.resume();
+        ab.textContent = "SONIDO: ON";
+        ab.style.background = "var(--accent)";
+        ab.style.color = "#000";
+        audio.update(curS);
+    }
+};
+
+document.getElementById('loader').style.display='none';
+
+const clk3 = new THREE.Clock();
+function anim() {
+    requestAnimationFrame(anim);
+    const dt = clk3.getDelta();
+    const t = clk3.getElapsedTime();
+    const p = st[curS];
+    
+    clk *= 0.9;
+    mat.color.lerp(new THREE.Color(p.c), 0.05);
+    
+    let waveOffset = 0;
+    let speedX = p.s;
+    let speedY = p.s;
+    let targetY = 30;
+    let targetZ = 0;
+
+    if (curS === 3) {
+        waveOffset = Math.sin(t * 2) * 10;
+        speedX = 0;
+        speedY = 0;
+        targetY = 60;
+        targetZ = 0.2;
+    } else if (curS === 2) {
+        speedX = 0.08;
+        speedY = 0.1;
+    }
+    
+    const td = p.d + clk + waveOffset + (Math.abs(mx)*5);
+    mat.displacementScale += (td - mat.displacementScale) * 0.08;
+    
+    tex.offset.x += speedX * dt;
+    tex.offset.y += speedY * dt;
+    
+    cam.position.x += (mx*20 - cam.position.x)*0.05;
+    cam.position.y += (targetY + my*20 - cam.position.y)*0.05;
+    cam.lookAt(0,5,0);
+    cam.rotation.z += (targetZ - cam.rotation.z) * 0.02;
+    
+    rend.render(scene, cam);
+}
+anim();
+
+window.addEventListener('resize', () => {
+    cam.aspect = window.innerWidth/window.innerHeight;
+    cam.updateProjectionMatrix();
+    rend.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
